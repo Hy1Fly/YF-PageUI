@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>YF-Cloud | 资源中心</title>
+  <style>
+    @font-face {
+      font-family: 'CustomFont';
+      src: url('Font.ttf') format('truetype');
+      font-weight: normal;
+      font-style: normal;
+    }
+
+    :root {
+      --primary-color: #2c3e50;
+      --secondary-color: #3498db;
+      --text-color: #34495e;
+      --font-main: 'CustomFont', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      --announcement-color: #fff3cd;
+      --dark-bg: #1a1a1a;
+      --dark-text: #e0e0e0;
+      --dark-border: #333333;
+    }
+
+    body {
+      font-family: var(--font-main);
+      background-color: #f8f9fa;
+      margin: 20px;
+      color: var(--text-color);
+      line-height: 1.6;
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    body[data-theme="dark"] {
+      background-color: var(--dark-bg);
+      color: var(--dark-text);
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 30px;
+    }
+
+    @media (min-width: 768px) {
+      .container {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    h1 {
+      text-align: center;
+      color: var(--primary-color);
+      grid-column: 1 / -1;
+      margin-bottom: 20px;
+    }
+
+    .theme-switcher {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 1000;
+    }
+
+    .theme-button {
+      background: var(--secondary-color);
+      color: white;
+      padding: 8px 16px;
+      border-radius: 20px;
+      border: none;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .announcement-section {
+      grid-column: 1 / -1;
+      background: var(--announcement-color);
+      padding: 20px;
+      border-radius: 12px;
+      border: 2px solid #ffecb5;
+      margin-bottom: 30px;
+    }
+
+    body[data-theme="dark"] .announcement-section {
+      background: #2d2d2d;
+      border-color: #444;
+    }
+
+    .announcement-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+
+    .announcement-title {
+      color: #856404;
+      margin: 0;
+      font-size: 1.2em;
+    }
+
+    .refresh-button {
+      background: none;
+      border: 1px solid #856404;
+      color: #856404;
+      padding: 5px 10px;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .release-section, .discussion-section {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+    }
+
+    body[data-theme="dark"] .release-section,
+    body[data-theme="dark"] .discussion-section {
+      background-color: #2a2a2a;
+      border: 1px solid var(--dark-border);
+    }
+
+    .section-title {
+      color: var(--secondary-color);
+      border-bottom: 2px solid var(--secondary-color);
+      padding-bottom: 10px;
+      margin-top: 0;
+    }
+
+    .release {
+      background-color: #f8f9fa;
+      padding: 15px;
+      margin: 15px 0;
+      border-radius: 8px;
+      border: 1px solid #e0e0e0;
+    }
+
+    .download-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px;
+      margin: 8px 0;
+      background: #fff;
+      border-radius: 6px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+
+    .file-info {
+      flex: 1;
+    }
+
+    .file-name {
+      font-weight: 500;
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .file-size {
+      color: #7f8c8d;
+      font-size: 0.9em;
+    }
+
+    .download-options {
+      display: flex;
+      gap: 12px;
+    }
+
+    .download-link {
+      padding: 8px 12px;
+      border-radius: 4px;
+      text-decoration: none;
+      transition: all 0.2s;
+      font-size: 0.9em;
+      white-space: nowrap;
+    }
+
+    .download-link:not(.accelerated) {
+      background: #f0f0f0;
+      color: var(--primary-color);
+      border: 1px solid #ddd;
+    }
+
+    .download-link.accelerated {
+      background: var(--secondary-color);
+      color: white;
+      border: 1px solid var(--secondary-color);
+    }
+
+    .toggle-assets {
+      background: var(--secondary-color);
+      color: white;
+      padding: 8px 15px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-family: inherit;
+      font-weight: 600;
+      transition: all 0.3s;
+      margin-top: 10px;
+    }
+
+    .quick-create {
+      background: #f8f9fa;
+      padding: 20px;
+      border-radius: 8px;
+      margin: 20px 0;
+      border: 1px solid #e0e0e0;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+
+    .form-input, .form-textarea {
+      width: 100%;
+      padding: 12px;
+      margin: 10px 0;
+      border: 2px solid #e0e0e0;
+      border-radius: 6px;
+      box-sizing: border-box;
+      font-family: inherit;
+      transition: border-color 0.3s;
+    }
+
+    .submit-button {
+      background: var(--secondary-color);
+      color: white;
+      padding: 12px 24px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-family: inherit;
+      font-weight: 600;
+      transition: all 0.3s;
+    }
+
+    .issue {
+      margin: 20px 0;
+      padding: 15px;
+      background: #fff;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+    }
+
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+
+    .comment {
+      margin: 15px 0;
+      padding: 12px;
+      background: #f8f9fa;
+      border-radius: 6px;
+      display: flex;
+      gap: 15px;
+    }
+
+    .comment-content {
+      flex-grow: 1;
+    }
+
+    .comment-author {
+      font-weight: 600;
+      color: var(--primary-color);
+    }
+
+    .comment-date {
+      color: #95a5a6;
+      font-size: 0.85em;
+    }
+
+    .comments-container {
+      margin-top: 15px;
+      border-top: 1px solid #eee;
+      padding-top: 15px;
+    }
+
+    .disclaimer-section {
+      grid-column: 1 / -1;
+      margin-top: 40px;
+      padding: 20px;
+      background: rgba(255, 255, 255, 0.9);
+      border-radius: 12px;
+      border: 1px solid #eee;
+      font-size: 0.9em;
+      color: #666;
+      text-align: center;
+    }
+
+    body[data-theme="dark"] .disclaimer-section {
+      background: rgba(0, 0, 0, 0.8);
+      color: #aaa;
+      border-color: var(--dark-border);
+    }
+
+    .disclaimer-link {
+      color: var(--secondary-color);
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .loading-text {
+      text-align: center;
+      color: var(--text-color);
+      padding: 20px;
+    }
+
+    @media (max-width: 768px) {
+      body {
+        margin: 10px;
+      }
+
+      .download-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+      }
+
+      .download-options {
+        width: 100%;
+        flex-direction: column;
+      }
+      
+      .download-link {
+        width: 100%;
+        text-align: center;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- 新增主题切换按钮 -->
+  <div class="theme-switcher">
+    <button class="theme-button" onclick="toggleTheme()">🌓 切换主题</button>
+  </div>
+
+  <h1>YF-Cloud 资源中心</h1>
+  
+  <div class="container">
+    <!-- 完整保留原始公告模块 -->
+    <div class="announcement-section">
+      <div class="announcement-header">
+        <h2 class="announcement-title">📢 系统公告</h2>
+        <button class="refresh-button" onclick="fetchAnnouncement()">刷新</button>
+      </div>
+      <div id="announcement-content">
+        <div class="loading-text">加载公告中...</div>
+      </div>
+    </div>
+
+    <!-- 完整文件发布模块 -->
+    <div class="release-section">
+      <h2 class="section-title">📦 文件发布</h2>
+      <div id="releases">
+        <div class="loading-text">加载发布文件中...</div>
+      </div>
+    </div>
+
+    <!-- 完整讨论区模块 -->
+    <div class="discussion-section">
+      <h2 class="section-title">💬 社区讨论</h2>
+      <div class="quick-create">
+        <h3 style="margin-top:0; color: var(--primary-color);">📝 新建讨论</h3>
+        <input type="text" id="issueTitle" 
+               placeholder="输入讨论标题（必填）" 
+               class="form-input"
+               required>
+        <textarea id="issueBody" 
+                  class="form-textarea"
+                  placeholder="输入讨论内容（支持Markdown格式）"></textarea>
+        <button onclick="createNewIssue()" 
+                class="submit-button">
+          创建讨论
+        </button>
+      </div>
+      <div id="discussions">
+        <div class="loading-text">加载讨论中...</div>
+      </div>
+    </div>
+
+    <!-- 新增免责声明 -->
+    <section class="disclaimer-section">
+      <strong>免责声明：</strong>
+      本站所有资源均为用户自发上传，不代表本站立场。下载内容仅供学习交流使用，不得用于商业用途。
+      使用本站资源产生的一切后果由使用者自行承担，与本站无关。如需删除内容，请联系管理员。
+      <a href="/disclaimer.html" class="disclaimer-link">查看完整声明</a>
+    </section>
+  </div>
+
+  <script>
+    // 新增主题功能
+    function toggleTheme() {
+      const currentTheme = document.body.getAttribute('data-theme') || 'light';
+      const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+      document.body.setAttribute('data-theme', newTheme);
+      localStorage.setItem('theme', newTheme);
+    }
+
+    function initTheme() {
+      const savedTheme = localStorage.getItem('theme') || 
+                        (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+      document.body.setAttribute('data-theme', savedTheme);
+    }
+
+    // 完整保留原始功能
+    async function initialize() {
+      initTheme();
+      try {
+        await Promise.all([
+          fetchAnnouncement(),
+          fetchReleases(),
+          fetchDiscussions()
+        ]);
+      } catch (error) {
+        showErrorNotification(`初始化失败: ${error.message}`);
+      }
+    }
+
+    // 完整公告功能
+    async function fetchAnnouncement() {
+      const contentDiv = document.getElementById('announcement-content');
+      try {
+        contentDiv.innerHTML = '<div class="loading-text">加载中...</div>';
+        const response = await fetch('https://raw.githubusercontent.com/Hy1Fly/YF-Cloud/main/home.txt');
+        if (!response.ok) throw new Error(`HTTP错误! 状态码: ${response.status}`);
+        const text = await response.text();
+        contentDiv.innerHTML = (text || '暂无公告').replace(/\n/g, '<br>');
+      } catch (error) {
+        contentDiv.innerHTML = `
+          <div class="error-text">
+            ${escapeHtml(error.message)}
+            <button onclick="fetchAnnouncement()" class="refresh-button">重试</button>
+          </div>
+        `;
+      }
+    }
+
+    // 完整文件发布功能
+    async function fetchReleases() {
+      try {
+        const response = await fetch('https://api.github.com/repos/Hy1Fly/YF-Cloud/releases');
+        if (!response.ok) throw new Error('获取发布信息失败');
+        
+        const releases = await response.json();
+        const container = document.getElementById('releases');
+        
+        container.innerHTML = releases.map(release => `
+          <div class="release">
+            <div class="release-header">
+              <h3>${escapeHtml(release.name)}</h3>
+              <div class="release-meta">
+                <span>版本：${escapeHtml(release.tag_name)}</span>
+                <span>发布时间：${new Date(release.published_at).toLocaleDateString()}</span>
+              </div>
+            </div>
+            <ul class="assets" style="display:none;">
+              ${release.assets.map(asset => `
+                <li class="download-item">
+                  <div class="file-info">
+                    <span class="file-name">${escapeHtml(asset.name)}</span>
+                    <span class="file-size">${formatFileSize(asset.size)}</span>
+                  </div>
+                  <div class="download-options">
+                    <a href="${asset.browser_download_url}" class="download-link">普通下载</a>
+                    <a href="${generateProxyUrl(asset.browser_download_url)}" 
+                       class="download-link accelerated">🚀 高速下载</a>
+                  </div>
+                </li>
+              `).join('')}
+            </ul>
+            <button class="submit-button toggle-assets">显示/隐藏资源</button>
+          </div>
+        `).join('');
+
+        // 保留资源切换功能
+        document.querySelectorAll('.toggle-assets').forEach(button => {
+          button.addEventListener('click', function() {
+            const assetsList = this.previousElementSibling;
+            assetsList.style.display = assetsList.style.display === 'none' ? 'block' : 'none';
+          });
+        });
+      } catch (error) {
+        showErrorNotification(`文件加载失败: ${error.message}`);
+      }
+    }
+
+    // 获取并显示讨论区
+    async function fetchDiscussions() {
+      try {
+        const response = await fetch('https://api.github.com/repos/Hy1Fly/YF-Cloud/issues');
+        const issues = await response.json();
+
+        issues.forEach(issue => {
+          const issueDiv = document.createElement('div');
+          issueDiv.className = 'issue';
+          issueDiv.innerHTML = `
+            <div class="issue-header">
+              <div class="user-info">
+                <img src="${issue.user.avatar_url}" class="avatar" alt="${issue.user.login}">
+                <div>
+                  <div class="comment-author">${issue.user.login}</div>
+                  <div class="comment-date">${new Date(issue.created_at).toLocaleString()}</div>
+                </div>
+              </div>
+              <h3>${issue.title}</h3>
+              <p>${issue.body}</p>
+              <button class="submit-button" onclick="loadComments(this, ${issue.number})"
+                style="margin-top:10px;padding:8px 15px;">
+                显示评论 (${issue.comments})
+              </button>
+            </div>
+            <div class="comments-container" style="display:none;"></div>
+          `;
+          document.getElementById('discussions').appendChild(issueDiv);
+        });
+      } catch (error) {
+        console.error('获取讨论信息失败:', error);
+      }
+    }
+
+    // 加载评论
+    async function loadComments(button, issueNumber) {
+      const container = button.parentElement.nextElementSibling;
+      if (container.children.length === 0) {
+        try {
+          const response = await fetch(`https://api.github.com/repos/Hy1Fly/YF-Cloud/issues/${issueNumber}/comments`);
+          const comments = await response.json();
+          
+          container.innerHTML = comments.map(comment => `
+            <div class="comment">
+              <img src="${comment.user.avatar_url}" class="avatar" alt="${comment.user.login}">
+              <div class="comment-content">
+                <div class="user-info">
+                  <span class="comment-author">${comment.user.login}</span>
+                  <span class="comment-date">${new Date(comment.created_at).toLocaleString()}</span>
+                </div>
+                <div class="comment-body">${comment.body}</div>
+              </div>
+            </div>
+          `).join('');
+        } catch (error) {
+          console.error('获取评论失败:', error);
+          container.innerHTML = '<div>无法加载评论</div>';
+        }
+      }
+      container.style.display = container.style.display === 'none' ? 'block' : 'none';
+    }
+
+    // 创建新Issue
+    function createNewIssue() {
+      const titleInput = document.getElementById('issueTitle');
+      const bodyInput = document.getElementById('issueBody');
+      
+      if (!titleInput.value.trim()) {
+        titleInput.focus();
+        titleInput.style.borderColor = '#e74c3c';
+        setTimeout(() => titleInput.style.borderColor = '#e0e0e0', 2000);
+        return;
+      }
+
+      const baseUrl = 'https://github.com/Hy1Fly/YF-Cloud/issues/new';
+      const params = new URLSearchParams({
+        title: titleInput.value.trim(),
+        body: bodyInput.value.trim(),
+        labels: 'user-generated'
+      });
+
+      const newWindow = window.open(`${baseUrl}?${params.toString()}`, '_blank');
+      
+      if (newWindow) {
+        titleInput.value = '';
+        bodyInput.value = '';
+        titleInput.style.borderColor = '#2ecc71';
+        setTimeout(() => titleInput.style.borderColor = '#e0e0e0', 1000);
+      }
+    }
+
+    // 保留所有工具函数
+    function escapeHtml(unsafe) {
+      return unsafe.toString()
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function generateProxyUrl(url) {
+      return `https://ghproxy.net/${encodeURI(url)}`;
+    }
+
+    function formatFileSize(bytes) {
+      const units = ['Bytes', 'KB', 'MB', 'GB'];
+      if (bytes == 0) return '0 Bytes';
+      const exp = Math.floor(Math.log(bytes) / Math.log(1024));
+      return `${(bytes / Math.pow(1024, exp)).toFixed(2)} ${units[exp]}`;
+    }
+
+    // 保留错误提示功能
+    function showErrorNotification(message) {
+      const notification = document.createElement('div');
+      notification.className = 'error-notification';
+      notification.innerHTML = `
+        <div class="error-content">
+          <span>❌ ${escapeHtml(message)}</span>
+          <button class="close-button">×</button>
+        </div>
+      `;
+      document.body.appendChild(notification);
+      notification.querySelector('.close-button').onclick = () => notification.remove();
+      setTimeout(() => notification.remove(), 5000);
+    }
+
+    // 初始化
+    document.addEventListener('DOMContentLoaded', initialize);
+  </script>
+</body>
+</html>
